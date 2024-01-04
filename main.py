@@ -4,17 +4,17 @@ import random
 
 #Function to select one of the actions with the highest estimated value
 class EpsilonGreedy:
-    def __init__(self, Qa, epsilon):
-        self.Qa = Qa
+    def __init__(self, Q_values, epsilon):
+        self.Q_values = Q_values
         self.epsilon = epsilon
 
     def _argmax(self):
-        max_Qa = max(self.Qa)
-        max_Qa_list = []
+        max_Q_value = max(self.Q_values)
+        max_Q_values_list = []
         for i,value in enumerate(self.Qa):
-            if value == max_Qa:
-                max_Qa_list.append(i)
-        return random.choice(max_Qa_list) #randomly choose if multiple indixes have same value
+            if value == max_Q_value:
+                max_Q_values_list.append(i)
+        return random.choice(max_Q_values_list) #randomly choose if multiple indixes have same value
 
     def epsilon_greedy(self): #Incorporate epsilon to explore
         random_number = np.random.random()
