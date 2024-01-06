@@ -48,6 +48,7 @@ if __name__ == "__main__":
 
     steps = 1000
     alpha = 0.01 #for fixed learning rate if wanting to use that instead of a step size 1/n
+    #for non-stationary a learning rate is usually more beneficial while for stationary step size is more beneficial
     true_action_values = np.random.normal(0,1,k)
 
     epsilon_greedy = EpsilonGreedy(Q_values,0.01)
