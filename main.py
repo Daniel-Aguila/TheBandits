@@ -11,7 +11,7 @@ class EpsilonGreedy:
     def _argmax(self):
         max_Q_value = max(self.Q_values)
         max_Q_values_list = []
-        for i,value in enumerate(self.Qa_values):
+        for i,value in enumerate(self.Q_values):
             if value == max_Q_value:
                 max_Q_values_list.append(i)
         return random.choice(max_Q_values_list) #randomly choose if multiple indixes have same value
@@ -19,9 +19,9 @@ class EpsilonGreedy:
     def epsilon_greedy(self): #Incorporate epsilon to explore
         random_number = np.random.random()
         if random_number < self.epsilon:
-            return random.choice(range(len(self.Qa_values)))
+            return random.choice(range(len(self.Q_values)))
         else:
-            return self._argmax(self.Qa_values)
+            return self._argmax()
 
 #implement QtA which gives the Q value at a current action given a certain time
 def getQtA(action, time, rewards_list, action_record):
@@ -35,3 +35,8 @@ def getQtA(action, time, rewards_list, action_record):
             return 0 #avoids a division by 0
         Qta = sum_rewards_until_t / num_times_action_recorded
     return Qta 
+
+#more space efficient of updating Q
+def updateQ(old_estimate, learning_rate, reward):
+    new_estimate = old_estimate + learning_rate * (reward-old_estimate)
+    return new_estimate
