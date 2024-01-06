@@ -37,17 +37,17 @@ def getQtA(action, time, rewards_list, action_record):
     return Qta 
 
 #more space efficient of updating Q
-def updateQ(old_estimate, learning_rate, reward):
-    new_estimate = old_estimate + learning_rate * (reward-old_estimate)
+def updateQ(old_estimate, step_size_n, reward):
+    new_estimate = old_estimate + (1/step_size_n) * (reward-old_estimate)
     return new_estimate
 
 if __name__ == "__main__":
-    k = 10
+    k = 5
     Q_values = np.zeros(k)
     action_counts = np.zeros(k)
 
     steps = 1000
-    alpha = 0.01
+    alpha = 0.01 #for fixed learning rate if wanting to use that instead of a step size 1/n
     true_action_values = np.random.normal(0,1,k)
 
     epsilon_greedy = EpsilonGreedy(Q_values,0.01)
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         reward = np.random.normal(true_action_values[action], 1)
         action_counts[action] += 1
 
-        Q_values[action] = updateQ(Q_values[action], alpha, reward)
+        Q_values[action] = updateQ(Q_values[action], action_counts[action], reward)
         
     print("Estimated action values:", Q_values)
     print("True action values:", true_action_values)
