@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import random
+import matplotlib.pyplot as plt
 
 #Function to select one of the actions with the highest estimated value
 class EpsilonGreedy:
@@ -41,9 +42,10 @@ def updateQ(old_estimate, step_size_n, reward):
     new_estimate = old_estimate + (1/step_size_n) * (reward-old_estimate)
     return new_estimate
 
-if __name__ == "__main__":
+def stationaryBandit():
     k = 5
-    Q_values = np.zeros(k)
+    Q_values_realistic = np.zeros(k)
+    Q_values_optimistic = np.full(k,5.0)
     action_counts = np.zeros(k)
 
     steps = 1000
@@ -51,18 +53,41 @@ if __name__ == "__main__":
     #for non-stationary a learning rate is usually more beneficial while for stationary step size is more beneficial
     true_action_values = np.random.normal(0,1,k)
 
-    epsilon_greedy = EpsilonGreedy(Q_values,0.01)
+    epsilon_greedy = EpsilonGreedy(Q_values_optimistic,0.1)
+    optimal_action = np.argmax(true_action_values)
+    optimal_action_selections = np.zeros(steps)
+    rewards = np.zeros(steps)
 
     for step in range(steps):
         action = epsilon_greedy.select_action()
 
         reward = np.random.normal(true_action_values[action], 1)
+        rewards[step] = reward
         action_counts[action] += 1
+        if action == optimal_action:
+            optimal_action_selections[step] = 1
+        else:
+            optimal_action_selections[step] = 0
 
-        Q_values[action] = updateQ(Q_values[action], action_counts[action], reward)
+        Q_values_optimistic[action] = updateQ(Q_values_optimistic[action], action_counts[action], reward)
         
-    print("Estimated action values:", Q_values)
+    print("Estimated action values:", Q_values_optimistic)
     print("True action values:", true_action_values)
     print("Optimal action:", np.argmax(true_action_values))
     print("Most selected action:", np.argmax(action_counts))
+    optimal_percentage = np.cumsum(optimal_action_selections) / (np.arange(steps) + 1)
+
+    plt.figure(figsize=(12, 6))
+
+    plt.plot(optimal_percentage, label='Optimal Action %')
+    plt.title('% Optimal Action Over Time')
+    plt.xlabel('Step')
+    plt.ylabel('Optimal Action %')
+    plt.legend()
+
+    plt.show()
+
+
+if __name__ == "__main__":
+    stationaryBandit()
 
