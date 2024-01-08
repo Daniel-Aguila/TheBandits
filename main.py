@@ -42,7 +42,13 @@ def updateQ(old_estimate, step_size_n, reward):
     new_estimate = old_estimate + (1/step_size_n) * (reward-old_estimate)
     return new_estimate
 
-def stationaryBandit():
+#upper confidence bound action selection action
+def UCB(Q_values, action_counts, time, c):
+    epsilon = 1e-9
+    action = np.argmax(Q_values + c * np.sqrt(np.log(time)/(action_counts) + epsilon))
+    return action
+
+def stationaryBandit(action_type):
     k = 5
     Q_values_realistic = np.zeros(k)
     Q_values_optimistic = np.full(k,5.0)
@@ -53,13 +59,19 @@ def stationaryBandit():
     #for non-stationary a learning rate is usually more beneficial while for stationary step size is more beneficial
     true_action_values = np.random.normal(0,1,k)
 
-    epsilon_greedy = EpsilonGreedy(Q_values_optimistic,0.1)
+    epsilon_greedy = EpsilonGreedy(Q_values_realistic,0.1)
     optimal_action = np.argmax(true_action_values)
     optimal_action_selections = np.zeros(steps)
     rewards = np.zeros(steps)
 
     for step in range(steps):
-        action = epsilon_greedy.select_action()
+        if action_type == "egreedy":
+            action = epsilon_greedy.select_action()
+        elif action_type == "UCB":
+            if step == 0:
+                action = 0
+            else:
+                action = UCB(Q_values_realistic,action_counts,step,2)
 
         reward = np.random.normal(true_action_values[action], 1)
         rewards[step] = reward
@@ -69,18 +81,21 @@ def stationaryBandit():
         else:
             optimal_action_selections[step] = 0
 
-        Q_values_optimistic[action] = updateQ(Q_values_optimistic[action], action_counts[action], reward)
+        Q_values_realistic[action] = updateQ(Q_values_realistic[action], action_counts[action], reward)
         
-    print("Estimated action values:", Q_values_optimistic)
+    print("Estimated action values:", Q_values_realistic)
     print("True action values:", true_action_values)
     print("Optimal action:", np.argmax(true_action_values))
     print("Most selected action:", np.argmax(action_counts))
+
+
+    #Plot
     optimal_percentage = np.cumsum(optimal_action_selections) / (np.arange(steps) + 1)
 
     plt.figure(figsize=(12, 6))
 
     plt.plot(optimal_percentage, label='Optimal Action %')
-    plt.title('% Optimal Action Over Time')
+    plt.title('% ' + action_type + 'Over Time')
     plt.xlabel('Step')
     plt.ylabel('Optimal Action %')
     plt.legend()
@@ -89,5 +104,5 @@ def stationaryBandit():
 
 
 if __name__ == "__main__":
-    stationaryBandit()
+    stationaryBandit(action_type="UCB")
 
